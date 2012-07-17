@@ -1,0 +1,45 @@
+﻿@model dynamic
+
+@{
+    ViewBag.Title = "View Account(s)";
+}
+
+<h2>title</h2>
+
+<p>
+    Accounts: <select data-bind="options: accounts, optionsText: 'Name', value: selectedAccount, optionsCaption: 'Select Account...'"></select>
+</p>
+
+<p data-bind="with: selectedAccount">
+    Campaigns: <select data-bind="options: Campaigns, optionsText: 'Name', value: viewModel.selectedCampaign, optionsCaption: 'Select Campaign...'"></select>
+</p>
+
+<ul data-bind="with: selectedCampaign" style="margin-top: 75px;">
+    <!-- ko foreach: Spots -->
+    <li data-bind="text: Name"></li>
+    <!-- /ko -->
+</ul>
+
+@section JavaScriptCode {
+    <script src="@Url.Content("~/Scripts/knockout-2.1.0.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Scripts/knockout.mapping-latest.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Scripts/home.index.js")" type="text/javascript"></script>
+    <script type="text/javascript">
+        $(function () {
+            //get accounts
+            $.get("/api/account").done(function (data) {
+
+                ko.mapping.fromJS(data, {}, viewModel.accounts);
+            });
+
+            viewModel.selectedCampaign.subscribe(function (newValue) {
+
+                $.get("/api/account/listspots", { accountId: viewModel.selectedAccount().Id(), campaignId: newValue.Id() })
+                    .done(function (data) {
+                        ko.mapping.fromJS(data, { }, viewModel.selectedCampaign.Spots);
+                    });
+                //alert("new campaign selected..." + newValue.Id());
+            });
+        });
+    </script>
+}
