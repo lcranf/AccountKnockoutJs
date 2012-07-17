@@ -34,9 +34,13 @@
 
             viewModel.selectedCampaign.subscribe(function (newValue) {
 
-                $.get("/api/account/listspots", { accountId: viewModel.selectedAccount().Id(), campaignId: newValue.Id() })
+                if (viewModel.selectedAccountId() == -1 || (typeof newValue === "undefined")) {
+                    return;
+                }
+                
+                $.get("/api/account/listspots", { accountId: viewModel.selectedAccountId(), campaignId: newValue.Id() })
                     .done(function (data) {
-                        ko.mapping.fromJS(data, { }, viewModel.selectedCampaign.Spots);
+                        ko.mapping.fromJS(data, {}, viewModel.selectedCampaign.Spots);
                     });
                 //alert("new campaign selected..." + newValue.Id());
             });
