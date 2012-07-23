@@ -14,15 +14,25 @@
     Campaigns: <select data-bind="options: Campaigns, optionsText: 'Name', value: viewModel.selectedCampaign, optionsCaption: 'Select Campaign...'"></select>
 </p>
 
-<ul data-bind="with: selectedCampaign" style="margin-top: 75px;">
-    <!-- ko foreach: Spots -->
+
+<h3 data-bind="if: selectedCampaign, text: (selectedCampaign() != null) ? 'Spots for ' + selectedCampaign().Name() : ''"></h3>
+
+<ul style="margin-top: 75px;" data-bind="sortable: { data: currentSpots }">
     <li data-bind="text: Name"></li>
-    <!-- /ko -->
+    
 </ul>
+
+<div style="width: 250px; height: 150px; border-color: black; background-color: burlywood;" data-bind="sortable: { data: scheduledSpots }">
+    <div data-bind="text: Name">
+    </div>
+</div>
+
+
 
 @section JavaScriptCode {
     <script src="@Url.Content("~/Scripts/knockout-2.1.0.js")" type="text/javascript"></script>
     <script src="@Url.Content("~/Scripts/knockout.mapping-latest.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Scripts/knockout-sortable.js")" type="text/javascript"></script>
     <script src="@Url.Content("~/Scripts/home.index.js")" type="text/javascript"></script>
     <script type="text/javascript">
         $(function () {
@@ -32,17 +42,22 @@
                 ko.mapping.fromJS(data, {}, viewModel.accounts);
             });
 
+            viewModel.selectedAccount.subscribe(function (newValue) {
+                //this could be where you load the scheduled spots
+                //for demo purposes we'll just clear the scheduled spots
+                viewModel.scheduledSpots.removeAll();
+            });
+
             viewModel.selectedCampaign.subscribe(function (newValue) {
 
                 if (viewModel.selectedAccountId() == -1 || (typeof newValue === "undefined")) {
                     return;
                 }
-                
+
                 $.get("/api/account/listspots", { accountId: viewModel.selectedAccountId(), campaignId: newValue.Id() })
                     .done(function (data) {
-                        ko.mapping.fromJS(data, {}, viewModel.selectedCampaign.Spots);
+                        ko.mapping.fromJS(data, {}, viewModel.currentSpots);
                     });
-                //alert("new campaign selected..." + newValue.Id());
             });
         });
     </script>

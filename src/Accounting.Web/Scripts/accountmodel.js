@@ -9,7 +9,7 @@ var AccountViewModel = function() {
 var CampaignViewModel = function() {
     this.Id = ko.observable();
     this.Name = ko.observable();
-    this.Spots = ko.observable();
+    this.Spots = ko.observableArray([]);
 }
 
 var SpotViewModel = function() {
